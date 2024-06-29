@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 import { v4 as uuid } from "uuid";
 import { doc, setDoc } from "firebase/firestore";
 import AppContext from "../GlobalStore/Context";
-import { db } from "../firebase/firebase";
+import { db } from "../../firebase";
 
 import {
   Container,

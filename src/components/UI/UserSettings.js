@@ -6,7 +6,7 @@ import usePictures from "../Custom_hooks/usePictures";
 
 import { doc, setDoc } from "firebase/firestore";
 import AppContext from "../GlobalStore/Context";
-import { db, storage } from "../firebase/firebase";
+import { db, storage } from "../../firebase";
 
 import {
   Container,

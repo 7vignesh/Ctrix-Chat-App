@@ -4,18 +4,21 @@ import {
   signInWithEmailAndPassword,
   onAuthStateChanged,
 } from "firebase/auth";
-import { auth } from "../components/firebase/firebase";
-import LoginInIcon from "../components/UI/icons/LogInIcon";
+import { auth } from "../firebase";
+
 import { useEffect } from "react";
 
 import { useNavigate } from "react-router-dom";
-import FormContainer from "../components/ChakraComponents/FormContainer";
+import FormContainer from "../components/Form/FormContainer";
 
 import { Button, VStack, HStack, useColorMode } from "@chakra-ui/react";
 
 import YupValidation, { initialValues } from "../components/Form/YupSignIn";
 import TextField from "../components/Form/TextField";
 import { Formik, Form } from "formik";
+
+import { IconContext } from "react-icons";
+import { FiLogIn } from "react-icons/fi";
 
 export default function Signin() {
   const Navigate = useNavigate();
@@ -58,7 +61,7 @@ export default function Signin() {
   };
 
   return (
-    <FormContainer Icon={LoginInIcon} title="Sign in for an account!">
+    <FormContainer Icon={LoginIcon} title="Sign in for an account!">
       <Formik
         initialValues={initialValues}
         validationSchema={YupValidation}
@@ -103,5 +106,17 @@ export default function Signin() {
         Sign in with Google
       </Button>
     </FormContainer>
+  );
+}
+
+function LoginIcon() {
+  return (
+    <IconContext.Provider
+      value={{ style: { color: "rgb(211, 127, 16)", fontSize: "4rem" } }}
+    >
+      <div>
+        <FiLogIn />
+      </div>
+    </IconContext.Provider>
   );
 }

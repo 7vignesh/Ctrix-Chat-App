@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
-import { db } from "../firebase/firebase";
+import { db } from "../../firebase";
 
 const useMsgFetch = ({ ChatType, ChatID }) => {
   // Hooks

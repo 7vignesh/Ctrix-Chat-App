@@ -1,7 +1,7 @@
 import { useEffect, useContext } from "react";
 
 import { onSnapshot, collection, query, where } from "firebase/firestore";
-import { db } from "../firebase/firebase";
+import { db } from "../../firebase";
 
 import AppContext from "../GlobalStore/Context";
 

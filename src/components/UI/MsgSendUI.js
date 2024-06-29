@@ -1,11 +1,16 @@
-import { useRef, useContext } from "react";
+import { useRef, useContext,useState,useEffect } from "react";
 import { setDoc, doc, serverTimestamp } from "firebase/firestore";
-import { db } from "../firebase/firebase";
+import { db } from "../../firebase";
 
 import AppContext from "../GlobalStore/Context";
 
 import GiffIcon from "./icons/GiffIcon";
-import GiffsDiv from "./GiffsDiv";
+
+// 
+import { Grid, SearchBar, SearchContext } from "@giphy/react-components";
+import { SearchContextManager } from "@giphy/react-components";
+
+//
 
 import { Button, HStack, Input, Container, Stack } from "@chakra-ui/react";
 import useDevice from "../Custom_hooks/useDevice";
@@ -113,3 +118,58 @@ export default function MsgSendUI(props) {
     </HStack>
   );
 }
+
+
+function GiffsDiv({ MsgSendHandler }) {
+  return (
+    <SearchContextManager apiKey={process.env.REACT_APP_GIPHY_API_KEY}>
+      <Container p="0" pos="relative">
+        <GiffComponent MsgSendHandler={MsgSendHandler} />
+      </Container>
+    </SearchContextManager>
+  );
+}
+
+const GiffComponent = ({ MsgSendHandler }) => {
+  const DEVICE = useDevice();
+  const { fetchGifs, searchKey } = useContext(SearchContext);
+  const context = useContext(AppContext);
+
+  const GifClick = (gif, e) => {
+    e.preventDefault();
+    MsgSendHandler({
+      type: "Gif",
+      GifID: gif.id,
+    });
+    context.setshowGifDiv(false);
+  };
+
+  const gifWidth = DEVICE === "Desktop" ? "450" : "320";
+
+  return (
+    <Container
+      p="0"
+      pos="absolute"
+      h="50vh"
+      width={gifWidth}
+      bottom="5vh"
+      left={DEVICE === "Desktop" ? "5vw" : "0"}
+      zIndex="40"
+      overflowY="scroll"
+      css={{ "&::-webkit-scrollbar": { display: "none" } }}
+      borderWidth="3px"
+    >
+      <Grid
+        key={searchKey}
+        fetchGifs={fetchGifs}
+        width={gifWidth}
+        columns={1}
+        onGifClick={GifClick}
+      />
+      <Container p="0" pos="sticky" bottom="0">
+        <SearchBar />
+      </Container>
+    </Container>
+  );
+};
+

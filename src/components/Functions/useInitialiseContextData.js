@@ -2,7 +2,7 @@ import { useEffect, useContext, useState } from "react";
 
 import { collection } from "firebase/firestore";
 import { useCollectionData } from "react-firebase-hooks/firestore";
-import { db } from "../firebase/firebase";
+import { db } from "../../firebase";
 
 import { onAuthStateChanged, getAuth } from "firebase/auth";
 

@@ -1,7 +1,13 @@
-import { useContext, useState } from "react";
+import { useContext, useState,useEffect } from "react";
 
 import ChatModal from "./UI/ChatModal";
-import AddChats from "./Comp_Parts/SideBar/AddChats";
+
+//
+import { db } from "../firebase";
+import { v4 as uuid } from "uuid";
+import { doc, setDoc } from "firebase/firestore";
+import { isMobile } from "react-device-detect";
+//
 
 import useDevice from "./Custom_hooks/useDevice";
 
@@ -18,6 +24,8 @@ import {
   List,
   ListItem,
   useColorMode,
+  VStack,
+  Checkbox
 } from "@chakra-ui/react";
 
 import { signOut, getAuth } from "firebase/auth";
@@ -257,3 +265,155 @@ const SideBarHeader = (props) => {
     </HStack>
   );
 };
+
+
+function AddChats({ groupBtnToggler }) {
+  // Init
+  const context = useContext(AppContext);
+
+  // Hooks
+  const [groupAddMode, setgroupAddMode] = useState(false);
+
+  const toggleGroupMode = () => {
+    groupBtnToggler((val) => !val);
+    setgroupAddMode((val) => !val);
+  };
+
+  return (
+    <Container padding="0">
+      <Button onClick={toggleGroupMode} w="full" size="lg">
+        Make Group Chat
+      </Button>
+      <VStack alignItems="flex-start" spacing="0">
+        {context.UsersData.map((user) => (
+          <AddChatPerson
+            user={user}
+            key={user.User_ID}
+            GroupMode={groupAddMode}
+          />
+        ))}
+      </VStack>
+    </Container>
+  );
+}
+
+
+function AddChatPerson(props) {
+  // Inits
+  const context = useContext(AppContext);
+  const [Placeholder] = usePictures();
+
+  // Hooks
+  const [isChecked, setisChecked] = useState(false);
+
+  useEffect(() => {
+    // For group chat adding user id in list to make group chat later on
+    if (isChecked) {
+      context.setNewGroupChatUserList((list) => {
+        if (list?.length > 0) {
+          return [
+            ...list,
+            {
+              ID: props.user.User_ID,
+            },
+          ];
+        }
+        return [
+          {
+            ID: props.user.User_ID,
+          },
+        ];
+      });
+    }
+    if (!isChecked) {
+      if (context.newGroupChatUserList.length > 0) {
+        context.setNewGroupChatUserList((list) =>
+          list.filter((val) => {
+            if (val.ID === props.user.User_ID) {
+              return false;
+            }
+            return true;
+          })
+        );
+      }
+    }
+    // eslint-disable-next-line
+  }, [isChecked]);
+
+  const ClickEvent = async () => {
+    if (props.GroupMode) return;
+
+    const ID = uuid();
+    const MsgRef = doc(db, "Private_Chat_init", ID);
+
+    // We filter all the group chat inits
+    const SecPersonNames = context.chatInit.filter(
+      (data) => data.ChatType === "DM"
+    );
+
+    // Check if Chat with other person already exists
+
+    const IfChatExist = SecPersonNames.findIndex(
+      (data) =>
+        data.User1.ID === props.user.User_ID ||
+        data.User2.ID === props.user.User_ID
+    );
+
+    if (
+      SecPersonNames.some(
+        (data) =>
+          data.User1.ID === props.user.User_ID ||
+          data.User2.ID === props.user.User_ID
+      )
+    ) {
+      const Chat = SecPersonNames[IfChatExist];
+      console.log(props);
+
+      if (isMobile) {
+        context.setopenChat(true);
+      }
+
+      context.setActivePrivateChatOtherUserData(props.user);
+      context.setNewPersonAddBtn(false);
+      context.setActiveChatInit(Chat);
+      return;
+    }
+
+    // Adding new chat
+    const DATA = {
+      ChatID: ID,
+      ChatType: "DM",
+      ChatUserID: [props.user.User_ID, context.Current_UserID],
+      User1: { ID: props.user.User_ID },
+      User2: { ID: context.Current_UserID },
+    };
+    setDoc(MsgRef, DATA);
+    if (isMobile) {
+      context.setopenChat(true);
+    }
+    context.setNewPersonAddBtn(false);
+    context.setActivePrivateChatOtherUserData(props.user);
+    context.setActiveChatInit(DATA);
+  };
+
+  return (
+    <HStack onClick={ClickEvent} padding="3" w="full">
+      {props.GroupMode && (
+        <Checkbox
+          checked={isChecked}
+          onChange={() => setisChecked((val) => !val)}
+          size="lg"
+        />
+      )}
+      <Image
+        src={
+          props.user.ProfilePicture ? props.user.ProfilePicture : Placeholder
+        }
+        alt="user profile"
+        boxSize="12"
+        borderRadius="50%"
+      />
+      <Heading size="md">{props.user.NickName}</Heading>
+    </HStack>
+  );
+}

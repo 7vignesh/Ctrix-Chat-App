@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 
-import FormContainer from "../components/ChakraComponents/FormContainer";
+import FormContainer from "../components/Form/FormContainer";
 
 import { VStack, Button, HStack } from "@chakra-ui/react";
 
@@ -15,12 +15,13 @@ export default function SignUp() {
   const Navigate = useNavigate();
 
   const SignUp = (values, actions) => {
+    console.log(actions)
     createUserWithEmailAndPassword(auth, values.email, values.confirmPassword)
       .then(() => {
-        actions.isSubmitting(false);
+        actions.setSubmitting(false);
       })
       .catch(() => {
-        actions.isSubmitting(false);
+        actions.setSubmitting(false);
       });
   };
 
