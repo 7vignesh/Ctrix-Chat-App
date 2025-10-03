@@ -17,7 +17,7 @@ import {
 export default function ChatModal(props) {
   // inits
   const [Placeholder] = usePictures();
-  const [Messages] = useMsgFetch(props.data);
+  const [Messages, isLoadingMessages] = useMsgFetch(props.data);
   const DEVICE = useDevice();
   const context = useContext(AppContext);
   const { colorMode } = useColorMode();
@@ -120,11 +120,13 @@ export default function ChatModal(props) {
         <Heading size="md" userSelect="none">
           {chatModalName}
         </Heading>
-        {Messages?.[Messages?.length - 1]?.Message === "Gif" ? (
+        {isLoadingMessages ? (
+          <Text userSelect="none" opacity="0.6">Loading…</Text>
+        ) : Messages?.[Messages?.length - 1]?.Message === "Gif" ? (
           <Text userSelect="none">Gif</Text>
         ) : (
           <Text userSelect="none">
-            {Messages?.[Messages?.length - 1]?.text.substring(0, 25)}
+            {Messages?.[Messages?.length - 1]?.text?.substring?.(0, 25) || ""}
           </Text>
         )}
       </VStack>

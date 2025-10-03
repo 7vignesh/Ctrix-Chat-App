@@ -5,8 +5,11 @@ import { db } from "../../firebase";
 const useMsgFetch = ({ ChatType, ChatID }) => {
   // Hooks
   const [Messages, setMessages] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    setIsLoading(true);
+    let unsubscribe;
     if (ChatType === "DM") {
       // Private Chat Fetch
       const DMref = query(
@@ -14,11 +17,13 @@ const useMsgFetch = ({ ChatType, ChatID }) => {
         orderBy("createdAt")
         // ,limitToLast(20)
       );
-      onSnapshot(DMref, (snapshot) => {
-        setMessages([]);
+      unsubscribe = onSnapshot(DMref, (snapshot) => {
+        const next = [];
         snapshot.docs.forEach((msg) => {
-          setMessages((data) => [...data, msg.data()]);
+          next.push(msg.data());
         });
+        setMessages(next);
+        setIsLoading(false);
       });
     }
 
@@ -29,18 +34,23 @@ const useMsgFetch = ({ ChatType, ChatID }) => {
         orderBy("createdAt")
         // ,limitToLast(25)
       );
-      onSnapshot(DMref, (snapshot) => {
-        setMessages([]);
+      unsubscribe = onSnapshot(DMref, (snapshot) => {
+        const next = [];
         snapshot.docs.forEach((msg) => {
-          setMessages((data) => [...data, msg.data()]);
+          next.push(msg.data());
         });
+        setMessages(next);
+        setIsLoading(false);
       });
     }
 
     // end
+    return () => {
+      unsubscribe && unsubscribe();
+    };
   }, [ChatType, ChatID]);
 
-  return [Messages];
+  return [Messages, isLoading];
 };
 
 export default useMsgFetch;
