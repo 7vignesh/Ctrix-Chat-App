@@ -1,108 +1,123 @@
-import { useContext } from "react";
+import { useRef, useContext, useState, useEffect } from "react";
 import AppContext from "../GlobalStore/Context";
 import usePictures from "../Custom_hooks/usePictures";
-
-import {
-  HStack,
-  VStack,
-  Image,
-  Text,
-  Container,
-  useColorMode,
-} from "@chakra-ui/react";
-
 import useDevice from "../Custom_hooks/useDevice";
-
-import { useState, useEffect } from "react";
+import { HStack, VStack, Image, Text, Box, Tooltip, useColorMode } from "@chakra-ui/react";
 import { GiphyFetch } from "@giphy/js-fetch-api";
 import { Gif } from "@giphy/react-components";
 
-const Message = (props) => {
-  // Init
+const Message = ({ data }) => {
   const context = useContext(AppContext);
   const [Placeholder] = usePictures();
   const { colorMode } = useColorMode();
   const DEVICE = useDevice();
 
-  const UserObtain =
-    context.allUsersData &&
-    context?.allUsersData?.find?.((data) => data.User_ID === props.data.Sender);
+  const UserObtain = context.allUsersData?.find(u => u.User_ID === data.Sender) || {};
+  const UserPic = UserObtain.ProfilePicture || Placeholder;
+  const isCurrentUser = context.Current_UserID === data.Sender;
 
-  const UserPic = UserObtain.ProfilePicture
-    ? UserObtain.ProfilePicture
-    : Placeholder;
   return (
     <VStack
-      alignSelf={
-        context.Current_UserID === props.data.Sender ? "flex-end" : "flex-start"
-      }
-      alignItems="flex-start"
+      w="100%"
+      alignSelf={isCurrentUser ? "flex-end" : "flex-start"}
+      alignItems={isCurrentUser ? "flex-end" : "flex-start"}
+      spacing="1"
+      mb="2"
     >
-      <HStack spacing={DEVICE === "Mobile" ? "1" : "2"}>
-        {context.Current_UserID !== props.data.Sender && (
+      <HStack spacing={DEVICE === "Mobile" ? 1 : 2} alignItems="flex-end">
+        {!isCurrentUser && (
           <Image
-            // className={`${styles.senderPhoto} ${styles.leftphoto}`}
-            alt="User profile"
             src={UserPic}
-            boxSize="10"
-            borderRadius="50%"
-            alignSelf="flex-end"
-            p="0"
+            alt="User profile"
+            boxSize={DEVICE === "Mobile" ? 8 : 10}
+            borderRadius="full"
             userSelect="none"
           />
         )}
-        {props.data.Message === "Gif" ? (
-          <Container padding="3" userSelect="none">
-            <GifComp GIF={props.data.Gif} />
-          </Container>
+
+        {data.Message === "Gif" ? (
+          <GifComp GIF={data.Gif} />
         ) : (
-          <Container
-            key={props.data.id}
-            bgColor={
-              context.Current_UserID === props.data.Sender
-                ? colorMode === "light"
-                  ? "cyan.700"
-                  : "brand.currentUserMessageBg"
+          <Box
+            maxW={DEVICE === "Mobile" ? "70%" : "60%"}
+            px={4}
+            py={2}
+            borderRadius="20px"
+            borderTopRightRadius={isCurrentUser ? "0" : "20px"}
+            borderTopLeftRadius={isCurrentUser ? "20px" : "0"}
+            bgGradient={
+              isCurrentUser
+                ? "linear(to-tr, cyan.400, blue.500)"
                 : colorMode === "light"
-                ? "facebook.700"
-                : "brand.otherUserMessageBg"
+                ? "gray.200"
+                : "gray.700"
             }
-            padding="3"
-            m="0 0 0 16px"
-            borderRadius="lg"
+            color={isCurrentUser ? "white" : colorMode === "light" ? "black" : "white"}
+            boxShadow="md"
+            position="relative"
+            _hover={{ opacity: 0.9 }}
           >
-            <Text
-              color={
-                context.Current_UserID === props.data.Sender
-                  ? "brand.currentUserMessageTextColor"
-                  : "brand.otherUserMessageTextColor"
-              }
-            >
-              {props.data.text}
-            </Text>
-          </Container>
+            <Text wordBreak="break-word">{data.text}</Text>
+
+            {data.timestamp && (
+              <Tooltip label={new Date(data.timestamp).toLocaleString()} fontSize="xs">
+                <Text
+                  fontSize="xs"
+                  color={isCurrentUser ? "whiteAlpha.700" : "blackAlpha.700"}
+                  position="absolute"
+                  bottom="-16px"
+                  right="4px"
+                >
+                  {timeAgo(data.timestamp)}
+                </Text>
+              </Tooltip>
+            )}
+          </Box>
         )}
       </HStack>
     </VStack>
   );
 };
 
-const GifComp = ({ GIF }) => {
+const timeAgo = timestamp => {
+  const now = new Date();
+  const diff = Math.floor((now - new Date(timestamp)) / 1000); 
+  if (diff < 60) return `${diff}s ago`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return `${Math.floor(diff / 86400)}d ago`;
+};
+
+const GifComp = React.memo(({ GIF }) => {
   const DEVICE = useDevice();
   const [gif, setGif] = useState(null);
+  const gifCache = useRef({}); 
+
   useEffect(() => {
+    if (gifCache.current[GIF]) {
+      setGif(gifCache.current[GIF]);
+      return;
+    }
     const giphyF = new GiphyFetch(process.env.REACT_APP_GIPHY_API_KEY);
-    const fetchFunction = async () => {
-      const { data } = await giphyF.gif(GIF);
+    giphyF.gif(GIF).then(({ data }) => {
+      gifCache.current[GIF] = data; // store in cache
       setGif(data);
-    };
-    fetchFunction();
+    });
   }, [GIF]);
+
+  if (!gif) return null;
+
   return (
-    <Container p="0" width={DEVICE === "Mobile" ? 200 : 300}>
-      {gif && <Gif gif={gif} width={DEVICE === "Mobile" ? 200 : 300} />}
-    </Container>
+    <Box
+      p="1"
+      maxW={DEVICE === "Mobile" ? 200 : 300}
+      borderRadius="16px"
+      overflow="hidden"
+      boxShadow="md"
+    >
+      <Gif gif={gif} width={DEVICE === "Mobile" ? 200 : 300} />
+    </Box>
   );
-};
+});
 
 export default Message;
