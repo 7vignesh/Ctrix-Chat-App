@@ -5,6 +5,7 @@ import useDevice from "./Custom_hooks/useDevice";
 import AppContext from "./GlobalStore/Context";
 import Message from "./UI/Message";
 import MsgSendUI from "./UI/MsgSendUI";
+import TypingIndicator from "./UI/TypingIndicator";
 
 import { VStack, HStack, Heading, Image, useColorMode } from "@chakra-ui/react";
 
@@ -66,6 +67,7 @@ export default function ChatRoom() {
           context.activeChatInitMessages.map((data) => (
             <Message key={data.id} data={data} />
           ))}
+        <TypingIndicator />
         <div ref={emptyDivRef}></div>
       </VStack>
       <MsgSendUI emptydiv={emptyDivRef} />

@@ -67,6 +67,9 @@ export const ContextWrapper = ({ children }) => {
   // Giff Div Show
   const [showGifDiv, setshowGifDiv] = useState(false);
 
+  // Typing Indicator
+  const [typingUsers, setTypingUsers] = useState([]);
+
   //
   // Some kind of Toggler for mounting Certain component ^^^^^^
   //
@@ -118,6 +121,9 @@ export const ContextWrapper = ({ children }) => {
 
         showGifDiv,
         setshowGifDiv,
+
+        typingUsers,
+        setTypingUsers,
 
         firstTimeLogin,
         setFirstTimeLogin,
