@@ -94,7 +94,7 @@ export default function MsgSendUI(props) {
       // bgColor="brand.primary"
     >
       <Container id="GifDiv" p="0" w={DEVICE === "Mobile" ? "10vw" : "2vw"}>
-        {context.showGifDiv && <GiffsDiv MsgSendHandler={SendMsg} />}
+        <GiffsDiv MsgSendHandler={SendMsg} show={context.showGifDiv} />
         <Container onClick={OpenGif} p="0">
           <GiffIcon />
         </Container>
@@ -120,10 +120,10 @@ export default function MsgSendUI(props) {
 }
 
 
-function GiffsDiv({ MsgSendHandler }) {
+function GiffsDiv({ MsgSendHandler, show }) {
   return (
     <SearchContextManager apiKey={process.env.REACT_APP_GIPHY_API_KEY}>
-      <Container p="0" pos="relative">
+      <Container p="0" pos="absolute" style={{ display: show ? "block" : "none" }}>
         <GiffComponent MsgSendHandler={MsgSendHandler} />
       </Container>
     </SearchContextManager>

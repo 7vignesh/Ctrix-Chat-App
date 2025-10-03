@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from "react";
+import { useRef, useContext, useState, useEffect } from "react";
 import AppContext from "../GlobalStore/Context";
 import usePictures from "../Custom_hooks/usePictures";
 import useDevice from "../Custom_hooks/useDevice";
@@ -88,18 +88,24 @@ const timeAgo = timestamp => {
   return `${Math.floor(diff / 86400)}d ago`;
 };
 
-const GifComp = ({ GIF }) => {
+const GifComp = React.memo(({ GIF }) => {
   const DEVICE = useDevice();
   const [gif, setGif] = useState(null);
+  const gifCache = useRef({}); 
 
   useEffect(() => {
+    if (gifCache.current[GIF]) {
+      setGif(gifCache.current[GIF]);
+      return;
+    }
     const giphyF = new GiphyFetch(process.env.REACT_APP_GIPHY_API_KEY);
-    const fetchGif = async () => {
-      const { data } = await giphyF.gif(GIF);
+    giphyF.gif(GIF).then(({ data }) => {
+      gifCache.current[GIF] = data; // store in cache
       setGif(data);
-    };
-    fetchGif();
+    });
   }, [GIF]);
+
+  if (!gif) return null;
 
   return (
     <Box
@@ -109,9 +115,9 @@ const GifComp = ({ GIF }) => {
       overflow="hidden"
       boxShadow="md"
     >
-      {gif && <Gif gif={gif} width={DEVICE === "Mobile" ? 200 : 300} />}
+      <Gif gif={gif} width={DEVICE === "Mobile" ? 200 : 300} />
     </Box>
   );
-};
+});
 
 export default Message;
