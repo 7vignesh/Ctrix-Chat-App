@@ -17,13 +17,13 @@ const TypingIndicator = () => {
 
   const getTypingText = () => {
     if (typingUsers.length === 1) {
-      return `${typingUsers[0].nickname} is typing...`;
+      return `${typingUsers[0].nickname} is typing`;
     } else if (typingUsers.length === 2) {
-      return `${typingUsers[0].nickname} and ${typingUsers[1].nickname} are typing...`;
+      return `${typingUsers[0].nickname} and ${typingUsers[1].nickname} are typing`;
     } else {
       return `${typingUsers[0].nickname} and ${
         typingUsers.length - 1
-      } others are typing...`;
+      } others are typing`;
     }
   };
 

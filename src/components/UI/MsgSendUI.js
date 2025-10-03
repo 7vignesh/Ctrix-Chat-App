@@ -46,19 +46,30 @@ export default function MsgSendUI(props) {
 
       try {
         if (isTyping) {
+          // Use a consistent object structure without timestamp for array operations
+          const userTypingObj = {
+            userId: context.Current_UserID,
+            nickname: context.Current_UserData?.NickName || "User",
+          };
+
+          // First remove any existing entry for this user, then add new one with timestamp
+          await updateDoc(chatRef, {
+            typingUsers: arrayRemove(userTypingObj),
+          });
+
+          // Add with current timestamp
           await updateDoc(chatRef, {
             typingUsers: arrayUnion({
-              userId: context.Current_UserID,
-              nickname: context.Current_UserData?.NickName || "User",
+              ...userTypingObj,
               timestamp: Date.now(),
             }),
           });
         } else {
+          // Remove using the consistent object structure
           await updateDoc(chatRef, {
             typingUsers: arrayRemove({
               userId: context.Current_UserID,
               nickname: context.Current_UserData?.NickName || "User",
-              timestamp: Date.now(),
             }),
           });
         }
@@ -69,26 +80,36 @@ export default function MsgSendUI(props) {
     [context.activeChatInit, context.Current_UserID, context.Current_UserData]
   );
 
+  // Track if user is currently marked as typing
+  const isTypingRef = useRef(false);
+
   const handleTyping = useCallback(() => {
+    // Only start typing status if not already typing
+    if (!isTypingRef.current) {
+      isTypingRef.current = true;
+      updateTypingStatus(true);
+    }
+
     // Clear existing timeout
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
 
-    // Set typing status to true
-    updateTypingStatus(true);
-
-    // Set timeout to remove typing status after 3 seconds
+    // Set timeout to remove typing status after 2 seconds of inactivity
     typingTimeoutRef.current = setTimeout(() => {
+      isTypingRef.current = false;
       updateTypingStatus(false);
-    }, 3000);
+    }, 2000);
   }, [updateTypingStatus]);
 
   const handleStopTyping = useCallback(() => {
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
-    updateTypingStatus(false);
+    if (isTypingRef.current) {
+      isTypingRef.current = false;
+      updateTypingStatus(false);
+    }
   }, [updateTypingStatus]);
 
   // Cleanup on unmount or chat change
@@ -97,7 +118,10 @@ export default function MsgSendUI(props) {
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
-      updateTypingStatus(false);
+      if (isTypingRef.current) {
+        isTypingRef.current = false;
+        updateTypingStatus(false);
+      }
     };
   }, [context.activeChatInit?.ChatID, updateTypingStatus]);
 
@@ -186,7 +210,7 @@ export default function MsgSendUI(props) {
           <Input
             placeholder="Type your message.."
             ref={NewMsgRef}
-            onKeyDown={handleTyping}
+            onChange={handleTyping}
             onBlur={handleStopTyping}
           />
         </form>
