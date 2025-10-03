@@ -1,4 +1,4 @@
-import { useRef, useContext, useState, useEffect } from "react";
+import React,{ useRef, useContext, useState, useEffect } from "react";
 import AppContext from "../GlobalStore/Context";
 import usePictures from "../Custom_hooks/usePictures";
 import useDevice from "../Custom_hooks/useDevice";
