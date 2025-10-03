@@ -73,6 +73,8 @@ Ctrix Chat is a real-time chat application built with React and Firebase. It all
     ```
     The app will be available at `http://localhost:3000`.
 
+make sure to check npm run build if it worke
+
 ## Contributing
 
 Contributions are welcome! Please see the [CONTRIBUTING.md](CONTRIBUTING.md) file for details on how to get started.
