@@ -1,12 +1,19 @@
-import { useRef, useContext } from "react";
-import { setDoc, doc, serverTimestamp } from "firebase/firestore";
+import { useRef, useContext, useEffect, useCallback } from "react";
+import {
+  setDoc,
+  doc,
+  serverTimestamp,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
+} from "firebase/firestore";
 import { db } from "../../firebase";
 
 import AppContext from "../GlobalStore/Context";
 
 import GiffIcon from "./icons/GiffIcon";
 
-// 
+//
 import { Grid, SearchBar, SearchContext } from "@giphy/react-components";
 import { SearchContextManager } from "@giphy/react-components";
 
@@ -24,6 +31,99 @@ export default function MsgSendUI(props) {
 
   // hooks
   const NewMsgRef = useRef();
+  const typingTimeoutRef = useRef();
+
+  // Typing indicator functions
+  const updateTypingStatus = useCallback(
+    async (isTyping) => {
+      if (!context.activeChatInit?.ChatID || !context.Current_UserID) return;
+
+      const chatCollection =
+        context.activeChatInit.ChatType === "DM"
+          ? "Private_Chat_init"
+          : "Group_Chat_init";
+      const chatRef = doc(db, chatCollection, context.activeChatInit.ChatID);
+
+      try {
+        if (isTyping) {
+          // Use a consistent object structure without timestamp for array operations
+          const userTypingObj = {
+            userId: context.Current_UserID,
+            nickname: context.Current_UserData?.NickName || "User",
+          };
+
+          // First remove any existing entry for this user, then add new one with timestamp
+          await updateDoc(chatRef, {
+            typingUsers: arrayRemove(userTypingObj),
+          });
+
+          // Add with current timestamp
+          await updateDoc(chatRef, {
+            typingUsers: arrayUnion({
+              ...userTypingObj,
+              timestamp: Date.now(),
+            }),
+          });
+        } else {
+          // Remove using the consistent object structure
+          await updateDoc(chatRef, {
+            typingUsers: arrayRemove({
+              userId: context.Current_UserID,
+              nickname: context.Current_UserData?.NickName || "User",
+            }),
+          });
+        }
+      } catch (error) {
+        console.log("Error updating typing status:", error);
+      }
+    },
+    [context.activeChatInit, context.Current_UserID, context.Current_UserData]
+  );
+
+  // Track if user is currently marked as typing
+  const isTypingRef = useRef(false);
+
+  const handleTyping = useCallback(() => {
+    // Only start typing status if not already typing
+    if (!isTypingRef.current) {
+      isTypingRef.current = true;
+      updateTypingStatus(true);
+    }
+
+    // Clear existing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    // Set timeout to remove typing status after 2 seconds of inactivity
+    typingTimeoutRef.current = setTimeout(() => {
+      isTypingRef.current = false;
+      updateTypingStatus(false);
+    }, 2000);
+  }, [updateTypingStatus]);
+
+  const handleStopTyping = useCallback(() => {
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    if (isTypingRef.current) {
+      isTypingRef.current = false;
+      updateTypingStatus(false);
+    }
+  }, [updateTypingStatus]);
+
+  // Cleanup on unmount or chat change
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      if (isTypingRef.current) {
+        isTypingRef.current = false;
+        updateTypingStatus(false);
+      }
+    };
+  }, [context.activeChatInit?.ChatID, updateTypingStatus]);
 
   // Function
   const OpenGif = () => {
@@ -39,6 +139,8 @@ export default function MsgSendUI(props) {
       if (Message === "") {
         return;
       }
+      // Stop typing indicator when sending message
+      handleStopTyping();
     }
     const id = Date.now().toString();
     let LocRef;
@@ -105,7 +207,12 @@ export default function MsgSendUI(props) {
             SendMsg({ type: "text", event: e });
           }}
         >
-          <Input placeholder="Type your message.." ref={NewMsgRef} />
+          <Input
+            placeholder="Type your message.."
+            ref={NewMsgRef}
+            onChange={handleTyping}
+            onBlur={handleStopTyping}
+          />
         </form>
       </Stack>
       <Button
@@ -119,8 +226,8 @@ export default function MsgSendUI(props) {
   );
 }
 
-
 function GiffsDiv({ MsgSendHandler, show }) {
+
   return (
     <SearchContextManager apiKey={process.env.REACT_APP_GIPHY_API_KEY}>
       <Container p="0" pos="absolute" style={{ display: show ? "block" : "none" }}>
@@ -172,4 +279,3 @@ const GiffComponent = ({ MsgSendHandler }) => {
     </Container>
   );
 };
-
