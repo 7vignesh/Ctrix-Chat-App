@@ -3,8 +3,7 @@ import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 
 import FormContainer from "../components/Form/FormContainer";
 
-import {  Heading, Button, VStack, HStack, useColorMode, Text, Flex } from "@chakra-ui/react";
-import { motion } from "framer-motion";
+import { VStack, Button, HStack } from "@chakra-ui/react";
 
 import TextField from "../components/Form/TextField";
 import { Formik, Form } from "formik";
@@ -14,7 +13,6 @@ export default function SignUp() {
   // Init
   const auth = getAuth();
   const Navigate = useNavigate();
-  const { colorMode } = useColorMode();
 
   const SignUp = (values, actions) => {
     console.log(actions)
@@ -32,15 +30,7 @@ export default function SignUp() {
   };
 
   return (
-    <FormContainer>
-      <Heading
-        fontSize={{ base: "3xl", md: "3xl" }}
-        fontWeight="bold"
-        textAlign="center"
-        mb={6}
-      >
-        Create your account
-      </Heading>
+    <FormContainer title="Sign up for an account!">
       <Formik
         initialValues={initialValues}
         validationSchema={YupValidation}
@@ -67,29 +57,12 @@ export default function SignUp() {
               YupValidation={YupValidation}
             />
 
-            <VStack w={"full"} marginTop="2" spacing={"2"} alignItems="center">
+            <VStack w={"full"} marginTop="2">
               <HStack w={"full"}>
-                <Button
-                  as={motion.button}
-                  type="submit"
-                  isLoading={props.isSubmitting}
-                  w={"full"}
-                  bgColor={colorMode === "light" ? "red.700" : "red.400"}
-                  whileHover={{ scale: 1.02, boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                >
+                <Button type="submit" isLoading={props.isSubmitting} w={"full"}>
                   Sign Up
                 </Button>
-                <Button
-                  as={motion.button}
-                  type="reset"
-                  w="full"
-                  color={colorMode === "light" ? "gray.500" : "gray.300"}
-                  whileHover={{ scale: 1.02, boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                >
+                <Button type="reset" w="full" bgColor="red.800">
                   Reset
                 </Button>
               </HStack>
@@ -97,25 +70,9 @@ export default function SignUp() {
           </Form>
         )}
       </Formik>
-      <Flex align="center" justify="center" gap={2} w="full" py={4}>
-        <Text fontSize="sm" color="gray.500">
-          Already have an account?
-        </Text>
-        <Button
-          onClick={navToSignIn}
-          variant="link"
-          color={colorMode === "light" ? "blue.600" : "blue.400"}
-          fontSize="sm"
-          p={0}
-          h="auto"
-          as={motion.button}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          transition={{ type: "spring", stiffness: 300, damping: 20 }}
-        >
-          Sign In
-        </Button>
-      </Flex>
+      <Button onClick={navToSignIn} w={"full"}>
+        Sign In
+      </Button>
     </FormContainer>
   );
 }
