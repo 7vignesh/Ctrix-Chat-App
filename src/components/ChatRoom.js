@@ -126,7 +126,7 @@ const ChatRoomHeader = () => {
         <Image
           alt="User profile"
           src={
-            context.activePrivateChatOtherUserData
+            context.activePrivateChatOtherUserData?.ProfilePicture
               ? context.activePrivateChatOtherUserData.ProfilePicture
               : Placeholder
           }
@@ -134,6 +134,7 @@ const ChatRoomHeader = () => {
           borderRadius="50%"
           userSelect="none"
         />
+
         <Heading size={DEVICE === "Mobile" ? "lg" : "md"} userSelect="none">
           {headerName}
         </Heading>
