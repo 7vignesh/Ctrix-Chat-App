@@ -16,7 +16,6 @@ const Message = ({ data }) => {
   const UserPic = UserObtain.ProfilePicture || Placeholder;
   const isCurrentUser = context.Current_UserID === data.Sender;
 
-  console.log(UserObtain)
 
   return (
     <VStack
