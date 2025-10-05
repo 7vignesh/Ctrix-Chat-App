@@ -1,5 +1,5 @@
-import { useContext, useRef, useLayoutEffect } from "react";
-
+import { useContext, useRef, useLayoutEffect, useState } from "react";
+import { CiSettings } from "react-icons/ci";
 import useDevice from "./Custom_hooks/useDevice";
 
 import AppContext from "./GlobalStore/Context";
@@ -7,10 +7,12 @@ import Message from "./UI/Message";
 import MsgSendUI from "./UI/MsgSendUI";
 import TypingIndicator from "./UI/TypingIndicator";
 
-import { VStack, HStack, Heading, Image, useColorMode } from "@chakra-ui/react";
+import { VStack, HStack, Heading, Image, useColorMode, useDisclosure, Button, Text } from "@chakra-ui/react";
 
 import usePictures from "./Custom_hooks/usePictures";
 import BackIcon from "./UI/icons/BackIcon";
+
+import { GroupSettingsModal } from "./GroupSettingsModal";
 
 export default function ChatRoom() {
   //init
@@ -83,6 +85,8 @@ const ChatRoomHeader = () => {
   const DEVICE = useDevice();
   const { colorMode } = useColorMode();
 
+  console.log(context)
+
   // const ShowOptionHandler = () => {
   //   setShowOptions(true);
   // };
@@ -115,7 +119,7 @@ const ChatRoomHeader = () => {
       position="sticky"
       top="0"
       bgColor={colorMode === "light" ? "brand.chatHeader" : "brand.chatHeader"}
-      // bgColor={"brand.secondary"}
+    // bgColor={"brand.secondary"}
     >
       <HStack>
         {DEVICE === "Mobile" && (
@@ -151,6 +155,8 @@ const ChatRoomHeader = () => {
           {/* <ChatOptionsDiv setVisibility={setShowOptions} /> */}
         </HStack>
       </HStack>
+      <GroupSettingsModal />
     </HStack>
   );
 };
+

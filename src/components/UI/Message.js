@@ -1,4 +1,4 @@
-import React,{ useRef, useContext, useState, useEffect } from "react";
+import React, { useRef, useContext, useState, useEffect } from "react";
 import AppContext from "../GlobalStore/Context";
 import usePictures from "../Custom_hooks/usePictures";
 import useDevice from "../Custom_hooks/useDevice";
@@ -16,6 +16,7 @@ const Message = ({ data }) => {
   const UserPic = UserObtain.ProfilePicture || Placeholder;
   const isCurrentUser = context.Current_UserID === data.Sender;
 
+
   return (
     <VStack
       w="100%"
@@ -24,7 +25,7 @@ const Message = ({ data }) => {
       spacing="1"
       mb="2"
     >
-      <HStack spacing={DEVICE === "Mobile" ? 1 : 2} alignItems="flex-end">
+      <HStack spacing={DEVICE === "Mobile" ? 1 : 2} alignItems="flex-end" w={"100%"}>
         {!isCurrentUser && (
           <Image
             src={UserPic}
@@ -40,6 +41,7 @@ const Message = ({ data }) => {
         ) : (
           <Box
             maxW={DEVICE === "Mobile" ? "70%" : "60%"}
+            w="100"
             px={4}
             py={2}
             borderRadius="20px"
@@ -49,14 +51,15 @@ const Message = ({ data }) => {
               isCurrentUser
                 ? "linear(to-tr, cyan.400, blue.500)"
                 : colorMode === "light"
-                ? "gray.200"
-                : "gray.700"
+                  ? "gray.200"
+                  : "gray.700"
             }
             color={isCurrentUser ? "white" : colorMode === "light" ? "black" : "white"}
             boxShadow="md"
             position="relative"
             _hover={{ opacity: 0.9 }}
           >
+            <Text fontSize={"small"}>{UserObtain.NickName}</Text>
             <Text wordBreak="break-word">{data.text}</Text>
 
             {data.timestamp && (
@@ -81,7 +84,7 @@ const Message = ({ data }) => {
 
 const timeAgo = timestamp => {
   const now = new Date();
-  const diff = Math.floor((now - new Date(timestamp)) / 1000); 
+  const diff = Math.floor((now - new Date(timestamp)) / 1000);
   if (diff < 60) return `${diff}s ago`;
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
@@ -91,7 +94,7 @@ const timeAgo = timestamp => {
 const GifComp = React.memo(({ GIF }) => {
   const DEVICE = useDevice();
   const [gif, setGif] = useState(null);
-  const gifCache = useRef({}); 
+  const gifCache = useRef({});
 
   useEffect(() => {
     if (gifCache.current[GIF]) {
