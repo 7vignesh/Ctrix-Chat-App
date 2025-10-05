@@ -11,21 +11,27 @@ function useChatInit() {
   const PMREF = collection(db, "Private_Chat_init");
 
   useEffect(() => {
+    // indicate loading while we attach listeners and receive first snapshots
+    context.setLoading(true);
     // Retrieving Private Chatroom details or chat initiase information related to current user
     // let ChatInitsFetched;
-    onSnapshot(
+    const unsubPrivate = onSnapshot(
       query(
         PMREF,
         where("ChatUserID", "array-contains", context.Current_UserID)
       ),
       (snapshot) => {
+        const next = [];
         snapshot.docs.forEach((doc) => {
           const data = doc.data();
-          //  Filter Older Version of Chat
-          context.setChatInit((chat) =>
-            chat.filter((arr) => arr.ChatID !== data.ChatID)
+          next.push(data);
+        });
+        // Replace in one commit to avoid flicker from multiple state updates
+        context.setChatInit((prev) => {
+          const filtered = prev.filter(
+            (arr) => !next.some((n) => n.ChatID === arr.ChatID)
           );
-          context.setChatInit((value) => [...value, data]);
+          return [...filtered, ...next];
         });
       }
     );
@@ -46,25 +52,33 @@ function useChatInit() {
 
     const GroupChatRef = collection(db, "Group_Chat_init");
 
-    onSnapshot(
+    const unsubGroup = onSnapshot(
       query(
         GroupChatRef,
         where("ChatUserID", "array-contains", context.Current_UserID)
       ),
       (snapshot) => {
+        const next = [];
         snapshot.docs.forEach((doc) => {
           const data = doc.data();
-
-          context.setChatInit((chat) =>
-            chat.filter((arr) => arr.ChatID !== data.ChatID)
-          );
-          context.setChatInit((value) => [...value, data]);
+          next.push(data);
         });
+        context.setChatInit((prev) => {
+          const filtered = prev.filter(
+            (arr) => !next.some((n) => n.ChatID === arr.ChatID)
+          );
+          return [...filtered, ...next];
+        });
+        // first group snapshot received; dismiss loading
         context.setLoading(false);
       }
     );
 
     // eslint-disable-next-line
+    return () => {
+      unsubPrivate && unsubPrivate();
+      unsubGroup && unsubGroup();
+    };
   }, [db, context.Current_UserData]);
   return null;
 }
