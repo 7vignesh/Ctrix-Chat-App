@@ -169,6 +169,8 @@ export default function MsgSendUI(props) {
       id: id,
       Sender: context.Current_UserID,
       createdAt: serverTimestamp(),
+      seenBy :[],
+      isSeen:false
     };
     if (data.type === "text") {
       setDoc(LocRef, {
