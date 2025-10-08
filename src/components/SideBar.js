@@ -26,7 +26,6 @@ import {
   useColorMode,
   VStack,
   Checkbox,
-  IconButton,
   useColorModeValue,
 } from "@chakra-ui/react";
 
@@ -183,17 +182,6 @@ const SideBarHeader = (props) => {
 
   const SignOut = () => {
     signOut(auth);
-    // context.setCurrent_UserID(null);
-    // context.setCurrent_UserData(undefined);
-    // context.setUsersData(undefined);
-    // context.setActiveChatInit(undefined);
-    // context.setActiveChatInitMessages(undefined);
-    // context.setActiveChatInit(undefined);
-    // context.setChatInit([]);
-    // context.setLoading(true);
-    // context.setNewPersonAddBtn(false);
-
-    // context.setActivePrivateChatOtherUserData("");
 
     Navigate("/");
   };
@@ -201,10 +189,7 @@ const SideBarHeader = (props) => {
     context.setsideBarOptions((snap) => !snap);
     context.setDisplayUserSettings(true);
   };
-  // const changeTheme = () => {
-  //   context.setsideBarOptions((snap) => !snap);
-  //   toggleColorMode();
-  // };
+  const menuItemBorder = colorMode === "dark" ? "1px solid black" : "1px solid white";
   return (
     <HStack
       justifyContent="space-between"
@@ -216,9 +201,6 @@ const SideBarHeader = (props) => {
       bgColor={
         colorMode === "light" ? "brand.chatHeaderLight" : "brand.chatHeader"
       }
-      // bgColor={"brand.secondary"}
-      // transition="background-color 2000ms easer"
-      // transitionDuration="2000ms"
     >
       <HStack>
         <Image
@@ -242,7 +224,6 @@ const SideBarHeader = (props) => {
 
         <Stack
           display={context.sideBarOptions ? "block" : "none"}
-          // pos="fixed" 
           pos="absolute"
           top="calc(100% + 8px)"
           right="0"
@@ -260,9 +241,7 @@ const SideBarHeader = (props) => {
               <Button
                 w="full"
                 borderRadius="0"
-                border={
-                  colorMode === "dark" ? "1px solid black" : "1px solid white"
-                }
+                border={menuItemBorder}
               >
                 {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
                 {colorMode === "light" ? " Dark" : " Light"}
@@ -272,9 +251,7 @@ const SideBarHeader = (props) => {
               <Button
                 w="full"
                 borderRadius="0"
-                border={
-                  colorMode === "dark" ? "1px solid black" : "1px solid white"
-                }
+                border={menuItemBorder}
               >
                 Edit Profile
               </Button>
@@ -283,9 +260,7 @@ const SideBarHeader = (props) => {
               <Button
                 w="full"
                 borderRadius="0"
-                border={
-                  colorMode === "dark" ? "1px solid black" : "1px solid white"
-                }
+                border={menuItemBorder}
               >
                 Logout
               </Button>
@@ -315,7 +290,7 @@ function AddChats({ groupBtnToggler }) {
         Make Group Chat
       </Button>
       <VStack alignItems="flex-start" spacing="0">
-        {context.UsersData.map((user) => (
+        {context.UsersData?.map((user) => (
           <AddChatPerson
             user={user}
             key={user.User_ID}
