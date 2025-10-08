@@ -80,7 +80,7 @@ export default function SideBar() {
       transition="background-color 0.3s ease"
     >
       {/* ===== Sidebar Header ===== */}
-      <Container p="0" overflowY="hidden">
+      <Container p="0" overflowY="hidden" h="20vh">
         {context.newPersonAddBtn ? (
           <SideBarHeader id="new" title="Add People" />
         ) : (
@@ -242,9 +242,10 @@ const SideBarHeader = (props) => {
 
         <Stack
           display={context.sideBarOptions ? "block" : "none"}
-          pos="fixed" 
-          top={{ base: "60px", md: "60px" }} 
-          left={{ base: "20px", sm: "50px", md: "320px", lg: "300px" }}
+          // pos="fixed" 
+          pos="absolute"
+          top="calc(100% + 8px)"
+          right="0"
           zIndex="3000" 
           boxShadow="lg"
           bg={colorMode === "light" ? "white" : "gray.800"}
