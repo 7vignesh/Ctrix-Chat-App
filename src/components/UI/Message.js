@@ -73,6 +73,7 @@ const Message = ({ data }) => {
       alignItems={isCurrentUser ? "flex-end" : "flex-start"}
       spacing="1"
       mb="2"
+      
     >
       <HStack
         spacing={DEVICE === "Mobile" ? 1 : 2}
