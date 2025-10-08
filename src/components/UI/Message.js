@@ -14,8 +14,10 @@ import {
 } from "@chakra-ui/react";
 import { GiphyFetch } from "@giphy/js-fetch-api";
 import { Gif } from "@giphy/react-components";
+import { CheckIcon } from "@chakra-ui/icons";
 
-const Message = ({ data }) => {
+const Message = ({ data }) =>
+{
   const context = useContext(AppContext);
   const [Placeholder] = usePictures();
   const { colorMode } = useColorMode();
@@ -66,6 +68,7 @@ const Message = ({ data }) => {
 
   const timeTextColor = colorMode === "light" ? "blackAlpha.700" : "whiteAlpha.700";
 
+  const isRead = data.isSeen;
   return (
     <VStack
       w="100%"
@@ -126,8 +129,14 @@ const Message = ({ data }) => {
                 >
                   {timeAgo(data.timestamp)}
                 </Text>
+                
               </Tooltip>
             )}
+            <CheckIcon style={{                       
+              height:"25px",
+              width:"25px",
+              padding:"5px"
+            }} color={isRead ? "blue": ""} />
           </Box>
         )}
       </HStack>
@@ -144,13 +153,16 @@ const timeAgo = (timestamp) => {
   return `${Math.floor(diff / 86400)}d ago`;
 };
 
-const GifComp = React.memo(({ GIF }) => {
+const GifComp = React.memo(({ GIF }) =>
+{
   const DEVICE = useDevice();
   const [gif, setGif] = useState(null);
   const gifCache = useRef({});
 
-  useEffect(() => {
-    if (gifCache.current[GIF]) {
+  useEffect(() =>
+  {
+    if (gifCache.current[GIF])
+    {
       setGif(gifCache.current[GIF]);
       return;
     }
