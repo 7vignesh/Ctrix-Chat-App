@@ -1,4 +1,4 @@
-import { useContext, useState,useEffect } from "react";
+import { useContext, useState, useEffect } from "react";
 
 import ChatModal from "./UI/ChatModal";
 
@@ -25,13 +25,16 @@ import {
   ListItem,
   useColorMode,
   VStack,
-  Checkbox
+  Checkbox,
+  IconButton,
+  useColorModeValue,
 } from "@chakra-ui/react";
 
 import { signOut, getAuth } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import usePictures from "../components/Custom_hooks/usePictures";
 import DotIcon from "../components/UI/icons/DotIcon";
+import { SunIcon, MoonIcon } from "@chakra-ui/icons";
 
 export default function SideBar() {
   // Inits
@@ -41,7 +44,7 @@ export default function SideBar() {
   // Hooks
   const [nameGroupChat, setnameGroupChat] = useState(false);
   const [makeGroupChatToggler, setMakeGroupBtnToggler] = useState(false);
-
+  const { colorMode, toggleColorMode } = useColorMode();
   const CloseOptionsInSideBarHeader = (event) => {
     window.addEventListener("mouseup", () => {
       if (event.target !== "dropdownmenu") {
@@ -54,40 +57,42 @@ export default function SideBar() {
     setnameGroupChat(true);
   };
 
+  const bg = useColorModeValue("brand.sideBarBackgroundLight", "brand.sideBarBackground");
+  const border = useColorModeValue("1px solid #E2E8F0", "1px solid #2D3748"); // Light / Dark gray border
+  const btnActiveColor = useColorModeValue("telegram", "red");
+  const btnInactiveColor = useColorModeValue("red", "telegram");
+
   return (
     <Container
       h="100vh"
       w={DEVICE === "Mobile" ? "full" : "25vw"}
-      // For Mobile making Sidebar disappear so only chat room can be seen on the screen
       display={context.openChat ? "none" : "flex"}
       flexDirection="column"
-      borderRight="1px solid black"
+      borderRight={border}
       m="0"
       p="0"
       pos="relative"
       onClick={CloseOptionsInSideBarHeader}
-      backgroundColor="brand.sideBarBackground"
+      backgroundColor={bg}
+      transition="background-color 0.3s ease"
     >
-      {/* SideBar Head */}
-      <Container p={"0"} overflowY={"hidden"}>
+      {/* ===== Sidebar Header ===== */}
+      <Container p="0" overflowY="hidden">
         {context.newPersonAddBtn ? (
           <SideBarHeader id="new" title="Add People" />
         ) : (
           <SideBarHeader title={context.Current_UserData?.NickName} />
         )}
-        {/* Chats and Contacts button stack */}
-        <HStack
-          pos="sticky"
-          top={DEVICE === "Desktop" ? "9vh" : "6vh"}
-          marginY="1"
-        >
+
+        {/* ===== Chats / Contacts Toggle Buttons ===== */}
+        <HStack pos="sticky" top={DEVICE === "Desktop" ? "9vh" : "6vh"} marginY="1">
           <Button
             onClick={() => {
               context.setNewPersonAddBtn(false);
               setMakeGroupBtnToggler(false);
             }}
             w="full"
-            colorScheme={!context.newPersonAddBtn ? "red" : "telegram"}
+            colorScheme={!context.newPersonAddBtn ? btnActiveColor : btnInactiveColor}
             boxShadow="none"
           >
             Chats
@@ -95,43 +100,48 @@ export default function SideBar() {
           <Button
             onClick={() => context.setNewPersonAddBtn(true)}
             w="full"
-            colorScheme={context.newPersonAddBtn ? "red" : "telegram"}
+            colorScheme={context.newPersonAddBtn ? btnActiveColor : btnInactiveColor}
             boxShadow="none"
           >
             Contacts
           </Button>
+
+          {/* ===== Theme Toggle Button ===== */}
+          <IconButton
+            aria-label="Toggle theme"
+            icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
+            onClick={toggleColorMode}
+            variant="ghost"
+          />
         </HStack>
+
+        {/* ===== Chat or Add People List ===== */}
         {context.newPersonAddBtn ? (
           <Container
-            p={"0"}
+            p="0"
             h="85%"
-            overflowY={"scroll"}
+            overflowY="scroll"
             css={{ "&::-webkit-scrollbar": { display: "none" } }}
           >
             <AddChats groupBtnToggler={setMakeGroupBtnToggler} />
           </Container>
         ) : (
           <Container
-            p={"0"}
+            p="0"
             h="85%"
-            overflowY={"scroll"}
+            overflowY="scroll"
             css={{ "&::-webkit-scrollbar": { display: "none" } }}
           >
             {context.chatInit?.length > 0 &&
-              context.chatInit.map((data) => (
-                <ChatModal key={data.ChatID} data={data} />
-              ))}
+              context.chatInit.map((data) => <ChatModal key={data.ChatID} data={data} />)}
           </Container>
         )}
       </Container>
+
+      {/* ===== Group Creation ===== */}
       {context.newPersonAddBtn && makeGroupChatToggler && (
         <>
-          <Button
-            pos="absolute"
-            bottom="0"
-            width="100%"
-            onClick={makeGroupChat}
-          >
+          <Button pos="absolute" bottom="0" width="100%" onClick={makeGroupChat}>
             Make Group
           </Button>
           {nameGroupChat && (
@@ -194,7 +204,7 @@ const SideBarHeader = (props) => {
       top="0"
       zIndex="400"
       boxShadow="sm"
-      bgColor={colorMode === "light" ? "brand.chatHeader" : "brand.chatHeader"}
+      bgColor={colorMode === "light" ? "brand.chatHeaderLight" : "brand.chatHeader"}
       // bgColor={"brand.secondary"}
       // transition="background-color 2000ms easer"
       // transitionDuration="2000ms"
@@ -230,7 +240,8 @@ const SideBarHeader = (props) => {
               <Button
                 w={"full"}
                 borderRadius="0"
-                border={colorMode === "dark" && "1px solid black"}
+                border={colorMode === "dark" ? "1px solid black" : "1px solid white"
+                }
               >
                 Edit Profile
               </Button>
@@ -239,7 +250,7 @@ const SideBarHeader = (props) => {
               <Button
                 w="full"
                 borderRadius="0"
-                border={colorMode === "dark" && "1px solid black"}
+                border={colorMode === "dark" ? "1px solid black" : "1px solid white"}
               >
                 Logout
               </Button>
@@ -265,7 +276,6 @@ const SideBarHeader = (props) => {
     </HStack>
   );
 };
-
 
 function AddChats({ groupBtnToggler }) {
   // Init
@@ -296,7 +306,6 @@ function AddChats({ groupBtnToggler }) {
     </Container>
   );
 }
-
 
 function AddChatPerson(props) {
   // Inits
