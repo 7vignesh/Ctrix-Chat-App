@@ -44,7 +44,7 @@ export default function SideBar() {
   // Hooks
   const [nameGroupChat, setnameGroupChat] = useState(false);
   const [makeGroupChatToggler, setMakeGroupBtnToggler] = useState(false);
-  const { colorMode, toggleColorMode } = useColorMode();
+
   const CloseOptionsInSideBarHeader = (event) => {
     window.addEventListener("mouseup", () => {
       if (event.target !== "dropdownmenu") {
@@ -57,7 +57,10 @@ export default function SideBar() {
     setnameGroupChat(true);
   };
 
-  const bg = useColorModeValue("brand.sideBarBackgroundLight", "brand.sideBarBackground");
+  const bg = useColorModeValue(
+    "brand.sideBarBackgroundLight",
+    "brand.sideBarBackground"
+  );
   const border = useColorModeValue("1px solid #E2E8F0", "1px solid #2D3748"); // Light / Dark gray border
   const btnActiveColor = useColorModeValue("telegram", "red");
   const btnInactiveColor = useColorModeValue("red", "telegram");
@@ -85,14 +88,20 @@ export default function SideBar() {
         )}
 
         {/* ===== Chats / Contacts Toggle Buttons ===== */}
-        <HStack pos="sticky" top={DEVICE === "Desktop" ? "9vh" : "6vh"} marginY="1">
+        <HStack
+          pos="sticky"
+          top={DEVICE === "Desktop" ? "9vh" : "6vh"}
+          marginY="1"
+        >
           <Button
             onClick={() => {
               context.setNewPersonAddBtn(false);
               setMakeGroupBtnToggler(false);
             }}
             w="full"
-            colorScheme={!context.newPersonAddBtn ? btnActiveColor : btnInactiveColor}
+            colorScheme={
+              !context.newPersonAddBtn ? btnActiveColor : btnInactiveColor
+            }
             boxShadow="none"
           >
             Chats
@@ -100,19 +109,15 @@ export default function SideBar() {
           <Button
             onClick={() => context.setNewPersonAddBtn(true)}
             w="full"
-            colorScheme={context.newPersonAddBtn ? btnActiveColor : btnInactiveColor}
+            colorScheme={
+              context.newPersonAddBtn ? btnActiveColor : btnInactiveColor
+            }
             boxShadow="none"
           >
             Contacts
           </Button>
 
           {/* ===== Theme Toggle Button ===== */}
-          <IconButton
-            aria-label="Toggle theme"
-            icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
-            onClick={toggleColorMode}
-            variant="ghost"
-          />
         </HStack>
 
         {/* ===== Chat or Add People List ===== */}
@@ -133,7 +138,9 @@ export default function SideBar() {
             css={{ "&::-webkit-scrollbar": { display: "none" } }}
           >
             {context.chatInit?.length > 0 &&
-              context.chatInit.map((data) => <ChatModal key={data.ChatID} data={data} />)}
+              context.chatInit.map((data) => (
+                <ChatModal key={data.ChatID} data={data} />
+              ))}
           </Container>
         )}
       </Container>
@@ -141,7 +148,12 @@ export default function SideBar() {
       {/* ===== Group Creation ===== */}
       {context.newPersonAddBtn && makeGroupChatToggler && (
         <>
-          <Button pos="absolute" bottom="0" width="100%" onClick={makeGroupChat}>
+          <Button
+            pos="absolute"
+            bottom="0"
+            width="100%"
+            onClick={makeGroupChat}
+          >
             Make Group
           </Button>
           {nameGroupChat && (
@@ -159,10 +171,7 @@ export default function SideBar() {
 const SideBarHeader = (props) => {
   // init
   const [Placeholder] = usePictures();
-  const {
-    colorMode,
-    // , toggleColorMode
-  } = useColorMode();
+  const { colorMode, toggleColorMode } = useColorMode();
   const Navigate = useNavigate();
   const context = useContext(AppContext);
   const auth = getAuth();
@@ -202,9 +211,11 @@ const SideBarHeader = (props) => {
       p="1"
       pos="sticky"
       top="0"
-      zIndex="400"
+      zIndex="100"
       boxShadow="sm"
-      bgColor={colorMode === "light" ? "brand.chatHeaderLight" : "brand.chatHeader"}
+      bgColor={
+        colorMode === "light" ? "brand.chatHeaderLight" : "brand.chatHeader"
+      }
       // bgColor={"brand.secondary"}
       // transition="background-color 2000ms easer"
       // transitionDuration="2000ms"
@@ -226,21 +237,42 @@ const SideBarHeader = (props) => {
           {props.title}
         </Heading>
       </HStack>
-      <Stack onClick={showDropDown} pos="relative">
+      <Stack onClick={showDropDown} pos="relative" zIndex="2000">
         <DotIcon />
 
         <Stack
           display={context.sideBarOptions ? "block" : "none"}
-          pos="absolute"
-          right="8"
-          top="4"
+          pos="fixed" 
+          top={{ base: "60px", md: "60px" }} 
+          left={{ base: "20px", sm: "50px", md: "320px", lg: "300px" }}
+          zIndex="3000" 
+          boxShadow="lg"
+          bg={colorMode === "light" ? "white" : "gray.800"}
+          borderRadius="md"
+          border="1px solid"
+          borderColor={colorMode === "light" ? "gray.200" : "gray.700"}
+          minW={{ base: "140px", md: "150px", lg: "180px" }}
+          w="max-content"
         >
           <List id="dropdownmenu" width="full">
+            <ListItem onClick={toggleColorMode}>
+              <Button
+                w="full"
+                borderRadius="0"
+                border={
+                  colorMode === "dark" ? "1px solid black" : "1px solid white"
+                }
+              >
+                {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
+                {colorMode === "light" ? " Dark" : " Light"}
+              </Button>
+            </ListItem>
             <ListItem onClick={ShowSettingHandler}>
               <Button
-                w={"full"}
+                w="full"
                 borderRadius="0"
-                border={colorMode === "dark" ? "1px solid black" : "1px solid white"
+                border={
+                  colorMode === "dark" ? "1px solid black" : "1px solid white"
                 }
               >
                 Edit Profile
@@ -250,26 +282,13 @@ const SideBarHeader = (props) => {
               <Button
                 w="full"
                 borderRadius="0"
-                border={colorMode === "dark" ? "1px solid black" : "1px solid white"}
+                border={
+                  colorMode === "dark" ? "1px solid black" : "1px solid white"
+                }
               >
                 Logout
               </Button>
             </ListItem>
-            {/* <ListItem>
-              <Button
-                onClick={changeTheme}
-                w="full"
-                borderRadius="0"
-                border={colorMode === "dark" && "1px solid black"}
-                padding={DEVICE === "Mobile" ? "8" : "5"}
-              >
-                {colorMode === "dark" ? (
-                  <BsFillSunFill size={50} />
-                ) : (
-                  <BsFillMoonFill size="40" />
-                )}
-              </Button>
-            </ListItem> */}
           </List>
         </Stack>
       </Stack>
